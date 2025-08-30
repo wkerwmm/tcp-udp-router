@@ -81,7 +81,7 @@ Bu hata, monitoring sistemi başlatılırken "metrics" servisi container'da kay�
 
 ## Lisans
 
-MIT Lisansı
+[MIT Lisansı](https://github.com/wkerwmm/tcp-udp-router/blob/main/LICENSE)
 
 ---
 
