@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# TypeScript output
+dist/
+build/
+
+# Environment files
+.env
+.env.*.local
+
+# npm / yarn / pnpm
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# IDE / OS specific
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docker
+*.dockerfile
+*.env
+
+# Test coverage
+coverage/
+*.lcov
+
+# Misc
+*.tmp
+*.bak
