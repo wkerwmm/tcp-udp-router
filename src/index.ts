@@ -36,6 +36,7 @@ async function main() {
 
     const pluginManager = new PluginManager(container, config.PLUGIN_DIR)
     await pluginManager.loadPlugins()
+    await pluginManager.startPlugins()
     container.registerSingleton('pluginManager', pluginManager)
 
     const metrics = setupMetrics(container, { METRICS_ENABLED: config.METRICS_ENABLED, METRICS_PORT: config.METRICS_PORT })

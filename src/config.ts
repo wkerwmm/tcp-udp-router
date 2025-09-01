@@ -11,6 +11,8 @@ interface Config {
   HEALTH_CHECK_INTERVAL: number
   ENABLE_HTTP_HEALTH: boolean
   HTTP_HEALTH_PORT: string
+  MINECRAFT_TARGET_IP: string
+  MINECRAFT_TARGET_PORT: string
 }
 
 export function loadConfig(): Config {
@@ -26,7 +28,9 @@ export function loadConfig(): Config {
     CONNECTION_TIMEOUT: process.env.CONNECTION_TIMEOUT,
     HEALTH_CHECK_INTERVAL: process.env.HEALTH_CHECK_INTERVAL,
     ENABLE_HTTP_HEALTH: process.env.ENABLE_HTTP_HEALTH,
-    HTTP_HEALTH_PORT: process.env.HTTP_HEALTH_PORT
+    HTTP_HEALTH_PORT: process.env.HTTP_HEALTH_PORT,
+    MINECRAFT_TARGET_IP: process.env.MINECRAFT_TARGET_IP,
+    MINECRAFT_TARGET_PORT: process.env.MINECRAFT_TARGET_PORT
   }
 
   const config: Config = {
@@ -41,7 +45,9 @@ export function loadConfig(): Config {
     CONNECTION_TIMEOUT: parseInt(rawConfig.CONNECTION_TIMEOUT || '30000', 10),
     HEALTH_CHECK_INTERVAL: parseInt(rawConfig.HEALTH_CHECK_INTERVAL || '30000', 10),
     ENABLE_HTTP_HEALTH: rawConfig.ENABLE_HTTP_HEALTH !== 'false',
-    HTTP_HEALTH_PORT: rawConfig.HTTP_HEALTH_PORT || '8080'
+    HTTP_HEALTH_PORT: rawConfig.HTTP_HEALTH_PORT || '8080',
+    MINECRAFT_TARGET_IP: rawConfig.MINECRAFT_TARGET_IP || '127.0.0.1',
+    MINECRAFT_TARGET_PORT: rawConfig.MINECRAFT_TARGET_PORT || '25566'
   }
 
   validateConfig(config)
@@ -105,7 +111,9 @@ export function getConfigWithDefaults(overrides: Partial<Config> = {}): Config {
     CONNECTION_TIMEOUT: 30000,
     HEALTH_CHECK_INTERVAL: 30000,
     ENABLE_HTTP_HEALTH: true,
-    HTTP_HEALTH_PORT: '8080'
+    HTTP_HEALTH_PORT: '8080',
+    MINECRAFT_TARGET_IP: '127.0.0.1',
+    MINECRAFT_TARGET_PORT: '25566'
   }
 
   const merged = { ...defaults, ...overrides }

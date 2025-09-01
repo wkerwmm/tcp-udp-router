@@ -37,3 +37,5 @@ coverage/
 # Misc
 *.tmp
 *.bak
+
+test.txt.txt

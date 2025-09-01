@@ -1,5 +1,5 @@
 import { readdirSync } from 'fs'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import { Container, Disposable } from '../container'
 import { MetricsCollector } from '../metrics'
 
@@ -60,7 +60,7 @@ export class PluginManager implements Disposable {
 
   private async loadPlugin(file: string): Promise<void> {
     try {
-      const pluginPath = join(this.pluginDir, file)
+      const pluginPath = resolve(join(this.pluginDir, file))
       const pluginModule = await import(pluginPath)
       
       if (pluginModule.default && typeof pluginModule.default.initialize === 'function') {
