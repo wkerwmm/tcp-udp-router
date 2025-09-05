@@ -1,3 +1,5 @@
+//sorunlu calisiyor 
+
 import { Plugin } from '../src/plugins/pluginManager'
 import { Container } from '../src/container'
 import { StructuredLogger } from '../src/logger'
