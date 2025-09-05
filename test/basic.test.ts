@@ -9,10 +9,10 @@ describe('TCP/UDP Router Core Components', () => {
     it('should register and resolve services', () => {
       const container = createContainer()
       const testService = { name: 'test' }
-      
-      container.register('testService', testService)
+
+      container.register('testService', () => testService)
       const resolved = container.resolve('testService')
-      
+
       expect(resolved).to.equal(testService)
     })
 
@@ -25,14 +25,16 @@ describe('TCP/UDP Router Core Components', () => {
 
   describe('Router', () => {
     it('should route based on rules', () => {
-      const router = new Router()
+      const container = createContainer()
+      const router = new Router(container)
       let handled = false
-      
+
       router.addRoute(
+        'testRoute',
         (ctx) => ctx.protocol === 'tcp',
         (ctx) => { handled = true }
       )
-      
+
       router.route({ protocol: 'tcp' })
       expect(handled).to.be.true
     })
@@ -40,12 +42,13 @@ describe('TCP/UDP Router Core Components', () => {
 
   describe('SessionStore', () => {
     it('should create and manage sessions', () => {
-      const store = new SessionStore()
+      const container = createContainer()
+      const store = new SessionStore(container)
       const mockSocket = { remoteAddress: '127.0.0.1', remotePort: 8080 }
-      
+
       const sessionId = store.createSession(mockSocket as any)
       const session = store.getSession(sessionId)
-      
+
       expect(session).to.exist
       expect(session?.protocol).to.equal('tcp')
       expect(store.removeSession(sessionId)).to.be.true
@@ -53,21 +56,21 @@ describe('TCP/UDP Router Core Components', () => {
   })
 
   describe('Pipeline', () => {
-    it('should process middleware in order', () => {
+    it('should process middleware in order', async () => {
       const pipeline = createPipeline()
       const calls: number[] = []
-      
-      pipeline.use((ctx, next) => {
+
+      pipeline.use(async (ctx, next) => {
         calls.push(1)
-        next()
+        await next()
       })
-      
-      pipeline.use((ctx, next) => {
+
+      pipeline.use(async (ctx, next) => {
         calls.push(2)
-        next()
+        await next()
       })
-      
-      pipeline.process({})
+
+      await pipeline.process({})
       expect(calls).to.deep.equal([1, 2])
     })
   })
