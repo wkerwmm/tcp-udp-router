@@ -3,6 +3,7 @@ import { createContainer } from '../src/container'
 import { Router } from '../src/core/router'
 import { SessionStore } from '../src/core/sessionStore'
 import { createPipeline } from '../src/pipeline'
+import { registerLogger } from '../src/logger'
 
 describe('TCP/UDP Router Core Components', () => {
   describe('Container', () => {
@@ -26,6 +27,7 @@ describe('TCP/UDP Router Core Components', () => {
   describe('Router', () => {
     it('should route based on rules', () => {
       const container = createContainer()
+      registerLogger(container)
       const router = new Router(container)
       let handled = false
 
@@ -43,6 +45,7 @@ describe('TCP/UDP Router Core Components', () => {
   describe('SessionStore', () => {
     it('should create and manage sessions', () => {
       const container = createContainer()
+      registerLogger(container)
       const store = new SessionStore(container)
       const mockSocket = { remoteAddress: '127.0.0.1', remotePort: 8080 }
 
