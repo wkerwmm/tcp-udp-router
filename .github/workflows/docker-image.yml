@@ -47,5 +47,3 @@ jobs:
           tags: |
             ghcr.io/wkerwmm/tcpudprouter:latest
             ghcr.io/wkerwmm/tcpudprouter:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/wkerwmm/tcpudprouter:latest
-          cache-to: type=registry,mode=max,ref=ghcr.io/wkerwmm/tcpudprouter:cache
