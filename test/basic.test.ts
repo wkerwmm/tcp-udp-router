@@ -17,7 +17,7 @@ describe('TCP/UDP Router Core Components', () => {
       expect(resolved).to.equal(testService)
     })
 
-    it('should throw error for unknown service', () => {
+    it('should throw error for unknown services', () => {
       const container = createContainer()
       
       expect(() => container.resolve('unknown')).to.throw('Service not found: unknown')
