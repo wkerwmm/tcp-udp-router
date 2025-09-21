@@ -9,6 +9,8 @@ export class SessionStore implements Disposable {
   private udpSessions: Map<string, Connection>
   private logger: StructuredLogger
   private metrics?: MetricsCollector
+  private sessionTimeoutMs: number
+  private cleanupIntervalId?: NodeJS.Timeout
 
   constructor(container: Container) {
     this.sessions = new Map()
@@ -18,6 +20,14 @@ export class SessionStore implements Disposable {
     if (container.has('metrics')) {
       this.metrics = container.resolve<MetricsCollector>('metrics')
     }
+
+    // Güvenlik için session timeout süresi (örnek: 30 dakika)
+    this.sessionTimeoutMs = 30 * 60 * 1000
+
+    // Periyodik temizleme işlemi başlat
+    this.cleanupIntervalId = setInterval(() => {
+      this.cleanupExpiredSessions()
+    }, 5 * 60 * 1000) // 5 dakikada bir
   }
 
   createSession(socket: Socket): string {
@@ -96,6 +106,44 @@ export class SessionStore implements Disposable {
     return false
   }
 
+  // Yeni: Süresi dolmuş sessionları temizle
+  private cleanupExpiredSessions(): void {
+    const now = Date.now()
+    for (const [sessionId, connection] of this.sessions.entries()) {
+      const idleTime = now - connection.lastActivity.getTime()
+      if (idleTime > this.sessionTimeoutMs) {
+        this.sessions.delete(sessionId)
+        this.logger.info('TCP session expired and removed', { sessionId, idleTime })
+        this.metrics?.decrementTcpConnections('active')
+      }
+    }
+    for (const [key, connection] of this.udpSessions.entries()) {
+      const idleTime = now - connection.lastActivity.getTime()
+      if (idleTime > this.sessionTimeoutMs) {
+        this.udpSessions.delete(key)
+        this.logger.info('UDP session expired and removed', { sessionId: connection.id, idleTime })
+        this.metrics?.decrementUdpConnections('active')
+      }
+    }
+  }
+
+  // Yeni: Temizleme işlemini durdur
+  async dispose(): Promise<void> {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId)
+    }
+    const tcpCount = this.sessions.size
+    const udpCount = this.udpSessions.size
+    
+    this.sessions.clear()
+    this.udpSessions.clear()
+    
+    this.logger.info('Session store disposed', { 
+      tcpSessionsCleared: tcpCount,
+      udpSessionsCleared: udpCount
+    })
+  }
+
   removeUdpSession(address: string, port: number): boolean {
     const key = `${address}:${port}`
     const connection = this.udpSessions.get(key)
@@ -150,19 +198,7 @@ export class SessionStore implements Disposable {
     return false
   }
 
-  async dispose(): Promise<void> {
-    const tcpCount = this.sessions.size
-    const udpCount = this.udpSessions.size
-    
-    this.sessions.clear()
-    this.udpSessions.clear()
-    
-    this.logger.info('Session store disposed', { 
-      tcpSessionsCleared: tcpCount,
-      udpSessionsCleared: udpCount
-    })
-  }
-
+  
   private generateSessionId(): string {
     // 16 bytes = 128 bits of entropy, encoded as hex is 32 characters, which is reasonable for a session ID
     return crypto.randomBytes(16).toString('hex') + Date.now().toString(36)

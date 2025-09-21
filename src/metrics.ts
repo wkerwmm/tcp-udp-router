@@ -128,7 +128,6 @@ export function setupMetrics(container?: Container, config?: { METRICS_ENABLED?:
     container.registerSingleton('metrics', collector)
   }
 
-  // Metrik sunucusunu sadece METRICS_ENABLED true ise başlat
   const metricsEnabled = config?.METRICS_ENABLED ?? true
   if (metricsEnabled) {
     const app = express()
