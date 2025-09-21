@@ -3,7 +3,7 @@ import { Container, Disposable } from '../container'
 import { StructuredLogger } from '../logger'
 import { MetricsCollector } from '../metrics'
 import { Connection, createConnection, updateConnectionActivity, addConnectionMetadata } from './connection'
-
+import * as crypto from 'crypto'
 export class SessionStore implements Disposable {
   private sessions: Map<string, Connection>
   private udpSessions: Map<string, Connection>
@@ -164,6 +164,7 @@ export class SessionStore implements Disposable {
   }
 
   private generateSessionId(): string {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36)
+    // 16 bytes = 128 bits of entropy, encoded as hex is 32 characters, which is reasonable for a session ID
+    return crypto.randomBytes(16).toString('hex') + Date.now().toString(36)
   }
 }
