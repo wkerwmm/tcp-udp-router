@@ -138,7 +138,8 @@ export function setupMetrics(container?: Container, config?: { METRICS_ENABLED?:
         res.set('Content-Type', client.register.contentType)
         res.end(await client.register.metrics())
       } catch (err) {
-        res.status(500).end(err)
+        console.error('Error while serving /metrics:', err);
+        res.status(500).end('Internal Server Error');
       }
     })
 
