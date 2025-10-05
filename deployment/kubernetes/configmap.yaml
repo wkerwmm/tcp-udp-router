@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-udp-router-config
+  namespace: tcp-udp-router
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  METRICS_ENABLED: "true"
+  ENABLE_HTTP_HEALTH: "true"
+  ENABLE_IP_FILTERING: "false"
+  ENABLE_RATE_LIMITING: "false"
+  ENABLE_DETAILED_HEALTH: "true"
+  MAX_CONNECTIONS: "1000"
+  CONNECTION_TIMEOUT: "30000"
+  HEALTH_CHECK_INTERVAL: "30000"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  MAX_CONNECTIONS_PER_IP: "10"

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tcp-udp-router
+  labels:
+    name: tcp-udp-router
+    app: tcp-udp-router

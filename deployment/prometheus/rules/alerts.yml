@@ -1,0 +1,56 @@
+groups:
+- name: tcp-udp-router
+  rules:
+  - alert: HighErrorRate
+    expr: rate(errors_total[5m]) > 0.1
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High error rate detected"
+      description: "Error rate is {{ $value }} errors per second"
+
+  - alert: HighLatency
+    expr: histogram_quantile(0.95, rate(processing_time_seconds_bucket[5m])) > 1
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High latency detected"
+      description: "95th percentile latency is {{ $value }} seconds"
+
+  - alert: HighConnectionCount
+    expr: tcp_connections_total > 800
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High connection count"
+      description: "TCP connections: {{ $value }}"
+
+  - alert: ServiceDown
+    expr: up{job="tcp-udp-router"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "TCP/UDP Router service is down"
+      description: "Service has been down for more than 1 minute"
+
+  - alert: HighMemoryUsage
+    expr: (process_resident_memory_bytes / 1024 / 1024) > 400
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage"
+      description: "Memory usage is {{ $value }} MB"
+
+  - alert: HighCPUUsage
+    expr: rate(process_cpu_seconds_total[5m]) > 0.8
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage"
+      description: "CPU usage is {{ $value }}"
