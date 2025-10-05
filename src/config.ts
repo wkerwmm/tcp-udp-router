@@ -13,6 +13,15 @@ interface Config {
   HTTP_HEALTH_PORT: string
   MINECRAFT_TARGET_IP: string
   MINECRAFT_TARGET_PORT: string
+  // Security configuration
+  ENABLE_IP_FILTERING: boolean
+  ENABLE_RATE_LIMITING: boolean
+  ENABLE_HEALTH_CHECK_AUTH: boolean
+  HEALTH_CHECK_SECRET?: string
+  MAX_CONNECTIONS_PER_IP: number
+  RATE_LIMIT_WINDOW_MS: number
+  RATE_LIMIT_MAX_REQUESTS: number
+  ENABLE_DETAILED_HEALTH: boolean
 }
 
 export function loadConfig(): Config {
@@ -30,7 +39,16 @@ export function loadConfig(): Config {
     ENABLE_HTTP_HEALTH: process.env.ENABLE_HTTP_HEALTH,
     HTTP_HEALTH_PORT: process.env.HTTP_HEALTH_PORT,
     MINECRAFT_TARGET_IP: process.env.MINECRAFT_TARGET_IP,
-    MINECRAFT_TARGET_PORT: process.env.MINECRAFT_TARGET_PORT
+    MINECRAFT_TARGET_PORT: process.env.MINECRAFT_TARGET_PORT,
+    // Security configuration
+    ENABLE_IP_FILTERING: process.env.ENABLE_IP_FILTERING,
+    ENABLE_RATE_LIMITING: process.env.ENABLE_RATE_LIMITING,
+    ENABLE_HEALTH_CHECK_AUTH: process.env.ENABLE_HEALTH_CHECK_AUTH,
+    HEALTH_CHECK_SECRET: process.env.HEALTH_CHECK_SECRET,
+    MAX_CONNECTIONS_PER_IP: process.env.MAX_CONNECTIONS_PER_IP,
+    RATE_LIMIT_WINDOW_MS: process.env.RATE_LIMIT_WINDOW_MS,
+    RATE_LIMIT_MAX_REQUESTS: process.env.RATE_LIMIT_MAX_REQUESTS,
+    ENABLE_DETAILED_HEALTH: process.env.ENABLE_DETAILED_HEALTH
   }
 
   const config: Config = {
@@ -47,7 +65,16 @@ export function loadConfig(): Config {
     ENABLE_HTTP_HEALTH: rawConfig.ENABLE_HTTP_HEALTH !== 'false',
     HTTP_HEALTH_PORT: rawConfig.HTTP_HEALTH_PORT || '8080',
     MINECRAFT_TARGET_IP: rawConfig.MINECRAFT_TARGET_IP || '127.0.0.1',
-    MINECRAFT_TARGET_PORT: rawConfig.MINECRAFT_TARGET_PORT || '25566'
+    MINECRAFT_TARGET_PORT: rawConfig.MINECRAFT_TARGET_PORT || '25566',
+    // Security configuration defaults
+    ENABLE_IP_FILTERING: rawConfig.ENABLE_IP_FILTERING === 'true',
+    ENABLE_RATE_LIMITING: rawConfig.ENABLE_RATE_LIMITING === 'true',
+    ENABLE_HEALTH_CHECK_AUTH: rawConfig.ENABLE_HEALTH_CHECK_AUTH === 'true',
+    HEALTH_CHECK_SECRET: rawConfig.HEALTH_CHECK_SECRET,
+    MAX_CONNECTIONS_PER_IP: parseInt(rawConfig.MAX_CONNECTIONS_PER_IP || '10', 10),
+    RATE_LIMIT_WINDOW_MS: parseInt(rawConfig.RATE_LIMIT_WINDOW_MS || '60000', 10),
+    RATE_LIMIT_MAX_REQUESTS: parseInt(rawConfig.RATE_LIMIT_MAX_REQUESTS || '100', 10),
+    ENABLE_DETAILED_HEALTH: rawConfig.ENABLE_DETAILED_HEALTH === 'true'
   }
 
   validateConfig(config)
@@ -113,7 +140,16 @@ export function getConfigWithDefaults(overrides: Partial<Config> = {}): Config {
     ENABLE_HTTP_HEALTH: true,
     HTTP_HEALTH_PORT: '8080',
     MINECRAFT_TARGET_IP: '127.0.0.1',
-    MINECRAFT_TARGET_PORT: '25566'
+    MINECRAFT_TARGET_PORT: '25566',
+    // Security configuration defaults
+    ENABLE_IP_FILTERING: false,
+    ENABLE_RATE_LIMITING: false,
+    ENABLE_HEALTH_CHECK_AUTH: false,
+    HEALTH_CHECK_SECRET: undefined,
+    MAX_CONNECTIONS_PER_IP: 10,
+    RATE_LIMIT_WINDOW_MS: 60000,
+    RATE_LIMIT_MAX_REQUESTS: 100,
+    ENABLE_DETAILED_HEALTH: false
   }
 
   const merged = { ...defaults, ...overrides }

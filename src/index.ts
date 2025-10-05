@@ -8,9 +8,11 @@ import { createDefaultRouter } from './core/router'
 import { SessionStore } from './core/sessionStore'
 import { PluginManager } from './plugins/pluginManager'
 import { createPipeline } from './pipeline'
-import { startHttpServer } from './httpHealth'
+import { startHttpServer, HealthCheckConfig } from './httpHealth'
 import { setupMetrics, MetricsCollector } from './metrics'
 import { setupMonitoring } from './monitoring'
+import { createSecurityManager, SecurityManager } from './security/securityManager'
+import { createSecurityPipeline, SecurityPipeline } from './security/securityMiddleware'
 
 async function main() {
   try {
@@ -44,9 +46,38 @@ async function main() {
       logger.info('Metrics enabled', { port: config.METRICS_PORT })
     }
 
+    // Initialize security manager
+    const securityManager = createSecurityManager(logger, metrics, undefined, {
+      enableIPFiltering: config.ENABLE_IP_FILTERING || false,
+      enableRateLimiting: config.ENABLE_RATE_LIMITING || false,
+      enableHealthCheckAuth: config.ENABLE_HEALTH_CHECK_AUTH || false,
+      healthCheckSecret: config.HEALTH_CHECK_SECRET,
+      maxConnectionsPerIP: config.MAX_CONNECTIONS_PER_IP || 10,
+      defaultRateLimit: {
+        windowMs: config.RATE_LIMIT_WINDOW_MS || 60000,
+        maxRequests: config.RATE_LIMIT_MAX_REQUESTS || 100
+      }
+    })
+    container.registerSingleton('securityManager', securityManager)
+
+    // Initialize security pipeline
+    const securityPipeline = createSecurityPipeline(securityManager, logger, metrics)
+    container.registerSingleton('securityPipeline', securityPipeline)
+
     if (config.ENABLE_HTTP_HEALTH) {
-      startHttpServer(config.HTTP_HEALTH_PORT, logger)
-      logger.info('HTTP health server enabled', { port: config.HTTP_HEALTH_PORT })
+      const healthConfig: HealthCheckConfig = {
+        enableAuth: config.ENABLE_HEALTH_CHECK_AUTH || false,
+        secret: config.HEALTH_CHECK_SECRET,
+        enableDetailedStatus: config.ENABLE_DETAILED_HEALTH || false,
+        enableMetrics: config.METRICS_ENABLED || false
+      }
+      
+      startHttpServer(config.HTTP_HEALTH_PORT, logger, securityManager, metrics, healthConfig)
+      logger.info('HTTP health server enabled', { 
+        port: config.HTTP_HEALTH_PORT,
+        authEnabled: healthConfig.enableAuth,
+        detailedStatus: healthConfig.enableDetailedStatus
+      })
     }
 
     const monitoring = setupMonitoring(container)
